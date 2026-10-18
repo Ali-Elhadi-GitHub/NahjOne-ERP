@@ -1,60 +1,470 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>نهج وان | NahjOne</title>
+  <title>نهج وان ERP | NahjOne Cloud Portal</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230ea5e9'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>" />
   <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --border: #1f2937;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
-    #app-frame { width: 100%; height: 100%; border: 0; display: block; background: #f8fafc; }
-    #loader {
-      position: fixed; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; background: #0f172a; color: #f8fafc;
-      z-index: 10; transition: opacity 0.25s ease;
+    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--text); }
+
+    /* Top Live Bar */
+    #top-bar {
+      height: 44px;
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 13px;
+      z-index: 50;
+      position: relative;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .brand-badge {
+      background: rgba(14, 165, 233, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+    .status-online {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-offline {
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .status-checking {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: #334155;
+      border-color: #475569;
+      color: #fff;
+    }
+    .btn-primary {
+      background: #0284c7;
+      border-color: #0284c7;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #0369a1;
+      border-color: #0369a1;
+    }
+
+    /* Main Area */
+    #main-content {
+      width: 100%;
+      height: calc(100% - 44px);
+      position: relative;
+    }
+    #app-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: none;
+      background: #f8fafc;
+    }
+
+    /* Overlay / Message Screens */
+    .overlay-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 20;
+      background: radial-gradient(circle at 50% 20%, #1e293b 0%, #090d16 80%);
+    }
+    .card-box {
+      width: 100%;
+      max-width: 540px;
+      background: rgba(17, 24, 39, 0.95);
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+      text-align: center;
+    }
+    .icon-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      margin: 0 auto 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .icon-offline {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .icon-checking {
+      background: rgba(14, 165, 233, 0.15);
+      color: #0ea5e9;
+      border: 1px solid rgba(14, 165, 233, 0.3);
     }
     .spinner {
-      width: 42px; height: 42px; border: 3px solid rgba(14, 165, 233, 0.25);
-      border-top-color: #0ea5e9; border-radius: 50%; animation: spin 0.8s linear infinite;
-      margin-bottom: 14px;
+      width: 38px;
+      height: 38px;
+      border: 3px solid rgba(14, 165, 233, 0.2);
+      border-top-color: #0ea5e9;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+    p.desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+
+    .steps-box {
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: right;
+      margin-bottom: 24px;
+    }
+    .steps-box h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .steps-box ol {
+      padding-right: 20px;
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.8;
+    }
+    .steps-box code {
+      background: #1e293b;
+      color: #38bdf8;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      direction: ltr;
+      display: inline-block;
+    }
+
+    .meta-info {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
   </style>
 </head>
 <body>
-  <div id="loader">
-    <div class="spinner"></div>
-    <div style="font-size: 16px; font-weight: 700;">NahjOne — نهج وان</div>
-    <div style="font-size: 12px; color: #94a3b8; margin-top: 6px;">جاري تحميل النظام...</div>
-  </div>
-  <iframe id="app-frame" allow="clipboard-read; clipboard-write; fullscreen; camera; microphone"></iframe>
+
+  <!-- Top Status Bar -->
+  <header id="top-bar">
+    <div class="brand">
+      <span>نهج وان ERP</span>
+      <span class="brand-badge">Live Cloud Portal</span>
+    </div>
+    <div id="status-container">
+      <span class="status-badge status-checking" id="header-status">
+        <span class="dot"></span>
+        <span id="header-status-text">جاري الاتصال...</span>
+      </span>
+    </div>
+    <div class="actions">
+      <button class="btn" id="btn-refresh" onclick="checkAndConnect(true)">
+        🔄 فحص مجدداً
+      </button>
+      <a class="btn btn-primary" id="btn-direct" href="#" target="_blank" style="display:none;">
+        ↗ فتح مباشر
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main id="main-content">
+    <!-- Iframe for Live App -->
+    <iframe id="app-frame" allow="clipboard-read; clipboard-write; fullscreen; camera; microphone"></iframe>
+
+    <!-- Overlay Screen (Shown while checking or when offline) -->
+    <div class="overlay-card" id="overlay">
+      <div class="card-box">
+        <div id="status-icon" class="icon-circle icon-checking">
+          <div class="spinner"></div>
+        </div>
+
+        <h2 id="modal-title">جاري الاتصال بنظام نهج وان...</h2>
+        <p class="desc" id="modal-desc">
+          يتم فحص اتصال النفق السحابي الآمن (Cloudflare Secure Tunnel) بالخادم المحلي...
+        </p>
+
+        <!-- Instructions shown when offline -->
+        <div class="steps-box" id="offline-steps" style="display:none;">
+          <h4>🚀 لتشغيل النظام أونلاين بخطوة واحدة:</h4>
+          <ol>
+            <li>افتح مجلد المشروع: <code>F:\02-Work\BusinessEngineer\ERP</code></li>
+            <li>شغّل الملف: <code>start-cloudflare-online.ps1</code> أو ملف التشغيل المباشر</li>
+            <li>بمجرد إنشاء النفق، <b>ستتصل هذه الصفحة تلقائياً</b> دون الحاجة لإعادة التحميل.</li>
+          </ol>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:10px;">
+          <button class="btn btn-primary" onclick="checkAndConnect(true)">
+            🔄 فحص الاتصال الآن
+          </button>
+        </div>
+
+        <div class="meta-info">
+          <span id="last-check-text">آخر فحص: الآن</span>
+          <span>•</span>
+          <span id="auto-retry-text">إعادة الفحص خلال 5 ثوانٍ...</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
   <script>
-    (async function() {
-      let target = 'https://ruth-invite-congress-ballot.trycloudflare.com';
+    let activeTunnelUrl = '';
+    let retryTimer = null;
+    let countdown = 5;
+
+    async function fetchLatestTunnelUrl() {
+      // 1. Try raw GitHub file (Fastest CDN, no rate limit)
+      try {
+        const rawRes = await fetch('https://raw.githubusercontent.com/Ali-Elhadi-GitHub/NahjOne/main/tunnel.json?t=' + Date.now(), { cache: 'no-store' });
+        if (rawRes.ok) {
+          const data = await rawRes.json();
+          if (data && data.url) return data.url.trim().replace(/\/+$/, '');
+        }
+      } catch (e) {}
+
+      // 2. Try relative local tunnel.json on GitHub Pages
+      try {
+        const relRes = await fetch('./tunnel.json?t=' + Date.now(), { cache: 'no-store' });
+        if (relRes.ok) {
+          const data = await relRes.json();
+          if (data && data.url) return data.url.trim().replace(/\/+$/, '');
+        }
+      } catch (e) {}
+
+      // 3. Try GitHub API
       try {
         const apiRes = await fetch('https://api.github.com/repos/Ali-Elhadi-GitHub/NahjOne/contents/tunnel.json?t=' + Date.now(), { cache: 'no-store' });
         if (apiRes.ok) {
           const meta = await apiRes.json();
           if (meta && meta.content) {
             const parsed = JSON.parse(atob(meta.content.replace(/\s/g, '')));
-            if (parsed && parsed.url) target = parsed.url;
+            if (parsed && parsed.url) return parsed.url.trim().replace(/\/+$/, '');
           }
-        } else {
-          const res = await fetch('./tunnel.json?t=' + Date.now(), { cache: 'no-store' });
-          const data = await res.json();
-          if (data && data.url) target = data.url;
         }
       } catch (e) {}
-      const frame = document.getElementById('app-frame');
-      frame.src = target + window.location.hash;
-      frame.onload = function() {
-        const loader = document.getElementById('loader');
-        if (loader) {
-          loader.style.opacity = '0';
-          setTimeout(() => loader.remove(), 250);
+
+      return '';
+    }
+
+    async function pingServer(baseUrl) {
+      if (!baseUrl) return false;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4500);
+
+      try {
+        const res = await fetch(`${baseUrl}/api/v1/health`, {
+          method: 'GET',
+          mode: 'cors',
+          signal: controller.signal,
+          cache: 'no-store'
+        });
+        clearTimeout(timeoutId);
+        return res.ok;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        // Fallback check: try fetching favicon or root with no-cors
+        try {
+          const testImg = new Image();
+          return await new Promise((resolve) => {
+            testImg.onload = () => resolve(true);
+            testImg.onerror = () => resolve(false);
+            testImg.src = `${baseUrl}/favicon.ico?t=` + Date.now();
+            setTimeout(() => resolve(false), 3000);
+          });
+        } catch {
+          return false;
         }
-      };
-    })();
+      }
+    }
+
+    function setOnline(url) {
+      activeTunnelUrl = url;
+      clearInterval(retryTimer);
+
+      // Update header
+      const headerStatus = document.getElementById('header-status');
+      headerStatus.className = 'status-badge status-online';
+      document.getElementById('header-status-text').textContent = 'متصل أونلاين';
+
+      const directBtn = document.getElementById('btn-direct');
+      directBtn.href = url + window.location.hash;
+      directBtn.style.display = 'inline-flex';
+
+      // Load Iframe smoothly
+      const frame = document.getElementById('app-frame');
+      const targetSrc = url + window.location.hash;
+      if (frame.src !== targetSrc) {
+        frame.src = targetSrc;
+      }
+      frame.style.display = 'block';
+
+      // Hide overlay
+      const overlay = document.getElementById('overlay');
+      overlay.style.transition = 'opacity 0.3s ease';
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 300);
+    }
+
+    function setOffline(reason) {
+      // Update header
+      const headerStatus = document.getElementById('header-status');
+      headerStatus.className = 'status-badge status-offline';
+      document.getElementById('header-status-text').textContent = 'الخادم غير متصل';
+
+      document.getElementById('btn-direct').style.display = 'none';
+
+      // Show overlay with helpful guidance
+      const overlay = document.getElementById('overlay');
+      overlay.style.display = 'flex';
+      overlay.style.opacity = '1';
+
+      document.getElementById('status-icon').className = 'icon-circle icon-offline';
+      document.getElementById('status-icon').innerHTML = '⚠️';
+      document.getElementById('modal-title').textContent = 'الخادم المحلي غير متصل حالياً';
+      document.getElementById('modal-desc').textContent = reason || 'نفق Cloudflare أو سيرفر نهج وان المحلي متوقف على جهازك.';
+      document.getElementById('offline-steps').style.display = 'block';
+
+      // Do NOT load dead url into frame!
+      const frame = document.getElementById('app-frame');
+      frame.style.display = 'none';
+      frame.src = 'about:blank';
+
+      startAutoRetry();
+    }
+
+    function startAutoRetry() {
+      clearInterval(retryTimer);
+      countdown = 5;
+      const retryText = document.getElementById('auto-retry-text');
+
+      retryTimer = setInterval(async () => {
+        countdown--;
+        if (countdown <= 0) {
+          retryText.textContent = 'جاري الفحص الآن...';
+          clearInterval(retryTimer);
+          await checkAndConnect(false);
+        } else {
+          retryText.textContent = `إعادة الفحص خلال ${countdown} ثوانٍ...`;
+        }
+      }, 1000);
+    }
+
+    async function checkAndConnect(isManual = false) {
+      document.getElementById('last-check-text').textContent = 'آخر فحص: ' + new Date().toLocaleTimeString('ar-EG');
+      
+      const headerStatus = document.getElementById('header-status');
+      headerStatus.className = 'status-badge status-checking';
+      document.getElementById('header-status-text').textContent = 'جاري الفحص...';
+
+      const url = await fetchLatestTunnelUrl();
+      if (!url) {
+        setOffline('لم يتم العثور على رابط نفق نشط في إعدادات النشر.');
+        return;
+      }
+
+      const isAlive = await pingServer(url);
+      if (isAlive) {
+        setOnline(url);
+      } else {
+        setOffline(`الرابط (${url}) غير متاح أو أن السيرفر المحلي تم إيقافه.`);
+      }
+    }
+
+    // Initial check on load
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAndConnect();
+    });
   </script>
 </body>
 </html>
